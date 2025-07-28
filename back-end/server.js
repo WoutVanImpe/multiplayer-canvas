@@ -1,15 +1,25 @@
 import { WebSocketServer } from "ws";
 
-const wss = new WebSocketServer({ port: process.env.port });
+const port = process.env.PORT || 8080;
+console.log(`Start WebSocket-server op poort ${port}...`);
+
+const wss = new WebSocketServer({ port });
 
 let positions = [];
 
-wss.on("connection", function connection(ws) {
-	ws.on("error", console.error);
+wss.on("listening", () => {
+	console.log(`WebSocket-server luistert op ws://localhost:${port}`);
+});
 
-	ws.on("message", function message(data) {
-		console.log("received: %s", data);
+wss.on("connection", function connection(ws) {
+	console.log("🔌 Nieuwe client verbonden");
+
+	ws.on("error", (err) => {
+		console.error("WebSocket fout:", err);
 	});
 
-	ws.send(positions);
+	ws.on("message", function message(data) {
+		console.log("Bericht ontvangen:", data.toString());
+	});
+	ws.send(JSON.stringify(positions));
 });
